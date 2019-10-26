@@ -22,7 +22,7 @@ public class Conexion {
     private static final String HOST = "localhost:3306";
     private static final String USER = "root";
     private static final String PASS = "";
-    private static final String DB = "abarrores_david";
+    private static final String DB = "abarrotes_david";
     private static final String URL = "jdbc:mysql://" + HOST + "/"+DB;
     private static final String DRIVER = "com.mysql.jdbc.Driver";
     private static Driver controlador = null;
