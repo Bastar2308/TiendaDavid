@@ -5,6 +5,7 @@
  */
 package com.mx.softwarebastar.dao;
 
+import com.mx.softwarebastar.pojo.Desglose_compra;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -20,25 +21,23 @@ public class Desglose_CompraDAO {
 
     private final String TABLE = "Desglose_Compra";
     private final String SQL_INSERT
-            = "Insert into " + TABLE + "() values(?,?,?)";
-    private final String SQL_DELETE = "Delete from " + TABLE + " where idProducto=?";
+            = "Insert into " + TABLE + "(producto_idproducto,compra_idcompra,cantidad,subtotal) values(?,?,?,?)";
+    private final String SQL_DELETE = "Delete from " + TABLE + " where idDesglose=?";
     private final String SQL_UPDATE = "Update " + TABLE
-            + " set nombre=?,precio=?,descripcion=? where idProducto=? ";
+            + " set producto_idProducto=?,compra_idCompra=?,cantidad=?,subtotal=? where idDesglose=? ";
     private final String SQL_QUERY = "Select * from " + TABLE;
 
-    
-    
-    
-    public int insertar(Producto p) {
+    public int insertar(Desglose_compra p) {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             //Inicializo el ps
             ps = Conexion.getConnection().prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
             //Llenar la consulta
-            ps.setString(1, p.getNombre());
-            ps.setDouble(2, p.getPrecio());
-            ps.setString(3, p.getDescripcion());
+            ps.setInt(1, p.getProducto_idProducto());
+            ps.setInt(2, p.getCompra_idCompra());
+            ps.setDouble(3, p.getCantidad());
+            ps.setDouble(4, p.getSubtotal());
             //Ejecuto la consulta y veo si funcionó
             if (ps.executeUpdate() == 0) {
                 System.out.println("Error al insertar");
@@ -82,45 +81,52 @@ public class Desglose_CompraDAO {
         return true;
     }
 
-    public void actualizar(Producto p) {
+    public boolean actualizar(Desglose_compra p) {
         PreparedStatement ps = null;
         try {
             ps = Conexion.getConnection().prepareStatement(SQL_UPDATE);
-            ps.setString(1, p.getNombre());
-            ps.setDouble(2, p.getPrecio());
-            ps.setString(3, p.getDescripcion());
-            ps.setInt(4, p.getIdProducto());
+            ps.setInt(1, p.getProducto_idProducto());
+            ps.setInt(2, p.getCompra_idCompra());
+            ps.setDouble(3, p.getCantidad());
+            ps.setDouble(4, p.getSubtotal());
+            ps.setInt(5, p.getIdDesglose());
             if (ps.executeUpdate() == 0) {
                 System.out.println("Error al actualizar");
+                return false;
             }
         } catch (Exception e) {
             System.out.println("Error al actualizar " + e);
+            return false;
         } finally {
             Conexion.close(ps);
         }
+        return true;
     }
 
-    public Producto convertir(ResultSet rs) {
-        Producto p = new Producto();
+    public Desglose_compra convertir(ResultSet rs) {
+        Desglose_compra p = new Desglose_compra();
         try {
-            String nombre = rs.getString("nombre");
-            double precio = rs.getDouble("precio");
-            String descripcion = rs.getString("descripcion");
-            int id = rs.getInt("idProducto");
-            p.setIdProducto(id);
-            p.setNombre(nombre);
-            p.setDescripcion(descripcion);
-            p.setPrecio(precio);
+            int idProducto = rs.getInt("producto_idproducto");
+            int idCompra = rs.getInt("compra_idcompra");
+            double cantidad = rs.getDouble("cantidad");
+            double subtotal = rs.getDouble("subtotal");
+            int idDesglose = rs.getInt("idDesglose");
+            int id = rs.getInt("idDesglose");
+            p.setProducto_idProducto(idProducto);
+            p.setCompra_idCompra(idCompra);
+            p.setIdDesglose(idDesglose);
+            p.setSubtotal(subtotal);
+            p.setCantidad(cantidad);
         } catch (Exception e) {
             System.out.println("Error al convertir " + e);
         }
         return p;
     }
 
-    public List<Producto> obtenerTodos() {
+    public List<Desglose_compra> obtenerTodos() {
         PreparedStatement ps = null;
         ResultSet rs = null;
-        List<Producto> productos = new ArrayList<>();
+        List<Desglose_compra> productos = new ArrayList<>();
         try {
             ps = Conexion.getConnection().prepareStatement(SQL_QUERY);
             rs = ps.executeQuery();
@@ -137,17 +143,18 @@ public class Desglose_CompraDAO {
 
     public DefaultTableModel cargarTabla() {
 
-        String encabezados[] = {"ID", "NOMBRE", "PRECIO", "DESCRIPiÓN"};
+        String encabezados[] = {"ID", "Producto", "Compra", "Cantidad","Subtotal"};
         DefaultTableModel df = new DefaultTableModel();
         df.setColumnIdentifiers(encabezados);
 
-        List<Producto> lista = obtenerTodos();
+        List<Desglose_compra> lista = obtenerTodos();
         for (int i = 0; i < lista.size(); i++) {
-            Object ob[] = new Object[4];
-            ob[0] = lista.get(i).getIdProducto();
-            ob[1] = lista.get(i).getNombre();
-            ob[2] = lista.get(i).getPrecio();
-            ob[3] = lista.get(i).getDescripcion();
+            Object ob[] = new Object[5];
+            ob[0] = lista.get(i).getIdDesglose();
+            ob[1] = lista.get(i).getProducto_idProducto();
+            ob[2] = lista.get(i).getCompra_idCompra();
+            ob[3] = lista.get(i).getCantidad();
+            ob[4] = lista.get(i).getSubtotal();
             df.addRow(ob);
         }
         return df;
