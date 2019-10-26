@@ -6,6 +6,7 @@
 package com.mx.softwarebastar.dao;
 
 import com.mx.softwarebastar.pojo.Desglose_compra;
+import com.mx.softwarebastar.pojo.Marca;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -15,29 +16,26 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  *
- * @author Bastar
+ * @author Davi_
  */
-public class Desglose_CompraDAO {
-
-    private final String TABLE = "Desglose_Compra";
+public class MarcaDAO {
+     private final String TABLE = "Marca";
     private final String SQL_INSERT
-            = "Insert into " + TABLE + "(producto_idproducto,compra_idcompra,cantidad,subtotal) values(?,?,?,?)";
-    private final String SQL_DELETE = "Delete from " + TABLE + " where idDesglose=?";
+            = "Insert into " + TABLE + "(nombre) values(?)";
+    private final String SQL_DELETE = "Delete from " + TABLE + " where idMarca=?";
     private final String SQL_UPDATE = "Update " + TABLE
-            + " set producto_idProducto=?,compra_idCompra=?,cantidad=?,subtotal=? where idDesglose=? ";
+            + " set nombre=? where idMarca=? ";
     private final String SQL_QUERY = "Select * from " + TABLE;
 
-    public int insertar(Desglose_compra p) {
+    public int insertar(Marca p) {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             //Inicializo el ps
             ps = Conexion.getConnection().prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
             //Llenar la consulta
-            ps.setInt(1, p.getProducto_idProducto());
-            ps.setInt(2, p.getCompra_idCompra());
-            ps.setDouble(3, p.getCantidad());
-            ps.setDouble(4, p.getSubtotal());
+            ps.setString(1, p.getNombre());
+    
             //Ejecuto la consulta y veo si funcionó
             if (ps.executeUpdate() == 0) {
                 System.out.println("Error al insertar");
@@ -81,15 +79,12 @@ public class Desglose_CompraDAO {
         return true;
     }
 
-    public boolean actualizar(Desglose_compra p) {
+    public boolean actualizar(Marca p) {
         PreparedStatement ps = null;
         try {
             ps = Conexion.getConnection().prepareStatement(SQL_UPDATE);
-            ps.setInt(1, p.getProducto_idProducto());
-            ps.setInt(2, p.getCompra_idCompra());
-            ps.setDouble(3, p.getCantidad());
-            ps.setDouble(4, p.getSubtotal());
-            ps.setInt(5, p.getIdDesglose());
+            ps.setString(1, p.getNombre());
+            ps.setInt(2, p.getIdMarca());
             if (ps.executeUpdate() == 0) {
                 System.out.println("Error al actualizar");
                 return false;
@@ -103,60 +98,53 @@ public class Desglose_CompraDAO {
         return true;
     }
 
-    public Desglose_compra convertir(ResultSet rs) {
-        Desglose_compra p = new Desglose_compra();
+    public Marca convertir(ResultSet rs) {
+        Marca p = new Marca();
         try {
-            int idProducto = rs.getInt("producto_idproducto");
-            int idCompra = rs.getInt("compra_idcompra");
-            double cantidad = rs.getDouble("cantidad");
-            double subtotal = rs.getDouble("subtotal");
-            int idDesglose = rs.getInt("idDesglose");
-            p.setProducto_idProducto(idProducto);
-            p.setCompra_idCompra(idCompra);
-            p.setIdDesglose(idDesglose);
-            p.setSubtotal(subtotal);
-            p.setCantidad(cantidad);
+            String nombre = rs.getString("nombre");
+            int idMarca = rs.getInt("idMarca");
+            
+            p.setNombre(nombre);
+            p.setIdMarca(idMarca);
+           
         } catch (Exception e) {
             System.out.println("Error al convertir " + e);
         }
         return p;
     }
 
-    public List<Desglose_compra> obtenerTodos() {
+    public List<Marca> obtenerTodos() {
         PreparedStatement ps = null;
         ResultSet rs = null;
-        List<Desglose_compra> productos = new ArrayList<>();
+        List<Marca> marca = new ArrayList<>();
         try {
             ps = Conexion.getConnection().prepareStatement(SQL_QUERY);
             rs = ps.executeQuery();
             while (rs.next()) {
-                productos.add(convertir(rs));
+                marca.add(convertir(rs));
             }
         } catch (Exception e) {
             System.out.println("Error " + e);
         }
         Conexion.close(ps);
         Conexion.close(rs);
-        return productos;
+        return marca;
     }
 
     public DefaultTableModel cargarTabla() {
 
-        String encabezados[] = {"ID", "Producto", "Compra", "Cantidad","Subtotal"};
+        String encabezados[] = {"ID", "Nombre"};
         DefaultTableModel df = new DefaultTableModel();
         df.setColumnIdentifiers(encabezados);
 
-        List<Desglose_compra> lista = obtenerTodos();
+        List<Marca> lista = obtenerTodos();
         for (int i = 0; i < lista.size(); i++) {
             Object ob[] = new Object[5];
-            ob[0] = lista.get(i).getIdDesglose();
-            ob[1] = lista.get(i).getProducto_idProducto();
-            ob[2] = lista.get(i).getCompra_idCompra();
-            ob[3] = lista.get(i).getCantidad();
-            ob[4] = lista.get(i).getSubtotal();
+            ob[0] = lista.get(i).getIdMarca();
+            ob[1] = lista.get(i).getNombre();
+           
             df.addRow(ob);
         }
         return df;
     }
-
 }
