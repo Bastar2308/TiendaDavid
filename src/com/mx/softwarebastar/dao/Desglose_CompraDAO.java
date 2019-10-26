@@ -111,7 +111,6 @@ public class Desglose_CompraDAO {
             double cantidad = rs.getDouble("cantidad");
             double subtotal = rs.getDouble("subtotal");
             int idDesglose = rs.getInt("idDesglose");
-            int id = rs.getInt("idDesglose");
             p.setProducto_idProducto(idProducto);
             p.setCompra_idCompra(idCompra);
             p.setIdDesglose(idDesglose);
