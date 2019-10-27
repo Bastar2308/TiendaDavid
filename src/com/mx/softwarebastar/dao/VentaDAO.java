@@ -5,7 +5,6 @@
  */
 package com.mx.softwarebastar.dao;
 
-import com.mx.softwarebastar.pojo.Desglose_compra;
 import com.mx.softwarebastar.pojo.Venta;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
