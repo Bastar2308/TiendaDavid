@@ -6,10 +6,11 @@
 package com.mx.softwarebastar.dao;
 
 import com.mx.softwarebastar.pojo.Desglose_compra;
-import com.mx.softwarebastar.pojo.Marca;
+import com.mx.softwarebastar.pojo.Venta;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
@@ -18,24 +19,25 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author Davi_
  */
-public class MarcaDAO {
-     private final String TABLE = "Marca";
+public class VentaDAO {
+     private final String TABLE = "Venta";
     private final String SQL_INSERT
-            = "Insert into " + TABLE + "(nombre) values(?)";
-    private final String SQL_DELETE = "Delete from " + TABLE + " where idMarca=?";
+            = "Insert into " + TABLE + "(cantidadArticulos,total,fecha) values(?,?,?)";
+    private final String SQL_DELETE = "Delete from " + TABLE + " where idVenta=?";
     private final String SQL_UPDATE = "Update " + TABLE
-            + " set nombre=? where idMarca=? ";
+            + " set cantidadArticulos=?,total=?,fecha=? where idVenta=? ";
     private final String SQL_QUERY = "Select * from " + TABLE;
 
-    public int insertar(Marca p) {
+    public int insertar(Venta p) {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             //Inicializo el ps
             ps = Conexion.getConnection().prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS);
             //Llenar la consulta
-            ps.setString(1, p.getNombre());
-    
+            ps.setInt(1, p.getCantidadArticulos());
+            ps.setDouble(2, p.getTotal());
+            ps.setTimestamp(3, p.getFecha());
             //Ejecuto la consulta y veo si funcionó
             if (ps.executeUpdate() == 0) {
                 System.out.println("Error al insertar");
@@ -79,12 +81,14 @@ public class MarcaDAO {
         return true;
     }
 
-    public boolean actualizar(Marca p) {
+    public boolean actualizar(Venta p) {
         PreparedStatement ps = null;
         try {
             ps = Conexion.getConnection().prepareStatement(SQL_UPDATE);
-            ps.setString(1, p.getNombre());
-            ps.setInt(2, p.getIdMarca());
+            ps.setInt(1, p.getCantidadArticulos());
+            ps.setDouble(2, p.getTotal());
+            ps.setTimestamp(3, p.getFecha());
+            ps.setInt(4, p.getIdVenta());
             if (ps.executeUpdate() == 0) {
                 System.out.println("Error al actualizar");
                 return false;
@@ -98,51 +102,54 @@ public class MarcaDAO {
         return true;
     }
 
-    public Marca convertir(ResultSet rs) {
-        Marca p = new Marca();
+    public Venta convertir(ResultSet rs) {
+        Venta p = new Venta();
         try {
-            String nombre = rs.getString("nombre");
-            int idMarca = rs.getInt("idMarca");
-            
-            p.setNombre(nombre);
-            p.setIdMarca(idMarca);
-           
+            int cantidadArticulos = rs.getInt("cantidad_articulos");
+            double total = rs.getDouble("total");
+            Timestamp fecha = rs.getTimestamp("fecha");
+            int id = rs.getInt("idVenta");
+            p.setCantidadArticulos(cantidadArticulos);
+            p.setTotal(total);
+            p.setFecha(fecha);
+            p.setIdVenta(id);
         } catch (Exception e) {
             System.out.println("Error al convertir " + e);
         }
         return p;
     }
 
-    public List<Marca> obtenerTodos() {
+    public List<Venta> obtenerTodos() {
         PreparedStatement ps = null;
         ResultSet rs = null;
-        List<Marca> marca = new ArrayList<>();
+        List<Venta> venta = new ArrayList<>();
         try {
             ps = Conexion.getConnection().prepareStatement(SQL_QUERY);
             rs = ps.executeQuery();
             while (rs.next()) {
-                marca.add(convertir(rs));
+                venta.add(convertir(rs));
             }
         } catch (Exception e) {
             System.out.println("Error " + e);
         }
         Conexion.close(ps);
         Conexion.close(rs);
-        return marca;
+        return venta;
     }
 
     public DefaultTableModel cargarTabla() {
 
-        String encabezados[] = {"ID", "Nombre"};
+        String encabezados[] = {"ID", "Cantidad Articulos", "Total", "Fecha"};
         DefaultTableModel df = new DefaultTableModel();
         df.setColumnIdentifiers(encabezados);
 
-        List<Marca> lista = obtenerTodos();
+        List<Venta> lista = obtenerTodos();
         for (int i = 0; i < lista.size(); i++) {
-            Object ob[] = new Object[2];
-            ob[0] = lista.get(i).getIdMarca();
-            ob[1] = lista.get(i).getNombre();
-           
+            Object ob[] = new Object[4];
+            ob[0] = lista.get(i).getIdVenta();
+            ob[1] = lista.get(i).getCantidadArticulos();
+            ob[2] = lista.get(i).getTotal();
+            ob[3] = lista.get(i).getFecha();
             df.addRow(ob);
         }
         return df;
